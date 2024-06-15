@@ -38,7 +38,7 @@ namespace DataGrid_DetachedModeExample
         {
             // 1. создать подключение к БД
             string connectionString = @"
-                Data Source=LAPTOP-SCD1CHJF\SQLEXPRESS;
+                Data Source=HOME-PC\SQLEXPRESS;
                 Initial Catalog=students_db_pv324;
                 Integrated Security=SSPI;
                 Timeout=5
