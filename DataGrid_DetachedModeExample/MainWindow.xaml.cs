@@ -1,69 +1,88 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Common;
+﻿using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace DataGrid_DetachedModeExample
 {
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        private SqlDataAdapter studentsDataAdapter;
-        private DataSet studentsDataSet;
-        private const string STUDENTS_TABLE_NAME = "students_t";
+        private SqlDataAdapter dataAdapter;
+        private DataSet dataSet;
+        private SqlConnection connection;
+        private string connectionString;
 
         public MainWindow()
         {
             InitializeComponent();
-            // 
-            InitDbObjects();
+            ShowConnectionWindow();
+        }
+
+        private void ShowConnectionWindow()
+        {
+            ConnectionWindow connectionWindow = new ConnectionWindow();
+            if (connectionWindow.ShowDialog() == true)
+            {
+                connectionString = connectionWindow.ConnectionString;
+                InitDbObjects();
+            }
+            else
+            {
+                Close();
+            }
         }
 
         private void InitDbObjects()
         {
-            // 1. создать подключение к БД
-            string connectionString = @"
-                Data Source=HOME-PC\SQLEXPRESS;
-                Initial Catalog=students_db_pv324;
-                Integrated Security=SSPI;
-                Timeout=5
-            ";
-            SqlConnection connection = new SqlConnection(connectionString);
-            // 2. подготовить dataAdapter
-            string selectQuery = "SELECT * FROM students_t;";
-            studentsDataAdapter = new SqlDataAdapter(selectQuery, connection);
-            new SqlCommandBuilder(studentsDataAdapter);
-            // 
-            studentsDataSet = null;
+            connection = new SqlConnection(connectionString);
+            connection.Open();
+            LoadTables();
         }
 
-        private void fillButton_Click(object sender, RoutedEventArgs e)
+        private void LoadTables()
         {
-            studentsDataSet = new DataSet();
-            studentsDataAdapter.Fill(studentsDataSet, STUDENTS_TABLE_NAME);
-            // привяжем таблицу DataSet в качестве источника данных для DataGrid
-            studentsDataGrid.ItemsSource = studentsDataSet.Tables[STUDENTS_TABLE_NAME].DefaultView;
+            DataTable schemaTable = connection.GetSchema("Tables");
+            foreach (DataRow row in schemaTable.Rows)
+            {
+                TablesComboBox.Items.Add(row[2].ToString());
+            }
         }
 
-        private void updateButton_Click(object sender, RoutedEventArgs e)
+        private void TablesComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            studentsDataAdapter.Update(studentsDataSet, STUDENTS_TABLE_NAME);
-            fillButton_Click(sender, e);    // вызвать обработчик обновления данных следом
+            if (TablesComboBox.SelectedItem != null)
+            {
+                string tableName = TablesComboBox.SelectedItem.ToString();
+                LoadTableData(tableName);
+            }
+        }
+
+        private void LoadTableData(string tableName)
+        {
+            dataSet = new DataSet();
+            string selectQuery = $"SELECT * FROM {tableName}";
+            dataAdapter = new SqlDataAdapter(selectQuery, connection);
+            new SqlCommandBuilder(dataAdapter);
+            dataAdapter.Fill(dataSet, tableName);
+            dataGrid.ItemsSource = dataSet.Tables[tableName].DefaultView;
+        }
+
+        private void FillButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TablesComboBox.SelectedItem != null)
+            {
+                string tableName = TablesComboBox.SelectedItem.ToString();
+                LoadTableData(tableName);
+            }
+        }
+
+        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (TablesComboBox.SelectedItem != null)
+            {
+                string tableName = TablesComboBox.SelectedItem.ToString();
+                dataAdapter.Update(dataSet, tableName);
+                LoadTableData(tableName);
+            }
         }
     }
 }

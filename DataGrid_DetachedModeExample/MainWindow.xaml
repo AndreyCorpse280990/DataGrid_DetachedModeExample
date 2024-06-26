@@ -3,28 +3,25 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DataGrid_DetachedModeExample"
         mc:Ignorable="d"
-        Title="Students!" 
-        Height="450" MinHeight="450"
-        Width="800" MinWidth="800"
-        FontFamily="Consolas" FontSize="20"
-        >
+        Title="Data Grid Example" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition MinHeight="350" />
-            <RowDefinition Height="60" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        
-        <!-- DataGrid -->
-        <DataGrid x:Name="studentsDataGrid" Margin="10" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" />
-        
-        <!-- Buttons -->
-        <Button x:Name="fillButton" Content="Fill" Margin="10" Grid.Row="1" Grid.Column="0" Click="fillButton_Click" />
-        <Button x:Name="updateButton" Content="Update" Margin="10" Grid.Row="1" Grid.Column="1" Click="updateButton_Click" />
+
+        <ComboBox x:Name="TablesComboBox" Grid.Row="0" Grid.Column="0" Margin="10" SelectionChanged="TablesComboBox_SelectionChanged"/>
+
+        <DataGrid x:Name="dataGrid" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="10"/>
+
+        <Button x:Name="fillButton" Content="Fill" Grid.Row="2" Margin="278,10,402,10" Click="FillButton_Click"/>
+        <Button x:Name="updateButton" Content="Update" Grid.Row="2" Margin="518,10,176,10" Click="UpdateButton_Click"/>
     </Grid>
 </Window>
